@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+group 'com.nationcraft.party'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name = "elmakers"
+        url = "https://maven.elmakers.com/repository/"
+    }
+
+    mavenLocal()
+}
+
+dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib"
+
+    compileOnly "org.spigotmc:spigot-api:1.7.10-R0.1-SNAPSHOT"
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
