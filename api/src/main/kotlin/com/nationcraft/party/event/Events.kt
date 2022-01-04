@@ -3,6 +3,7 @@
 package com.nationcraft.party.event
 
 import com.nationcraft.party.pojo.Party
+import com.nationcraft.party.pojo.invite.Invite
 import com.nationcraft.party.pojo.reward.RewardType
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -57,6 +58,27 @@ data class PartyCreateEvent(
 
 data class PartyDestroyEvent(
     val party: Party
+) : PartyEvent()
+
+data class PartyChatEvent(
+    val player: Player,
+    val party: Party,
+    val message: String
+) : PartyEvent()
+
+data class PartyUpdateChattingEvent(
+    val party: Party,
+    val player: Player,
+    var isChatting: Boolean
+) : PartyEvent()
+
+data class PartyInviteEvent(
+    val player: Player,
+    val party: Party
+) : PartyEvent()
+
+data class PartyDeclineEvent(
+    val invite: Invite
 ) : PartyEvent()
 
 data class PartyKickEvent(
