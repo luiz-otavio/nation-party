@@ -7,6 +7,7 @@ import java.util.*
 data class PartyMember(
     val uniqueId: UUID,
     var isLeader: Boolean = false,
+    var isChatting: Boolean = false,
     val created_at: Long = System.currentTimeMillis()
 ) {
 
