@@ -1,13 +1,15 @@
-package com.nationcraft.party.repository
+package com.nationcraft.party.repository.party
 
 import com.nationcraft.party.pojo.Party
+import org.bukkit.entity.Player
 import java.util.*
+import kotlin.collections.ArrayList
 
 object PartyRepository {
 
-    private val parties = hashSetOf<Party>()
+    private val parties = arrayListOf<Party>()
 
-    fun getParties(): Set<Party> {
+    fun getParties(): ArrayList<Party> {
         return parties
     }
 
@@ -18,6 +20,10 @@ object PartyRepository {
     fun removeParty(party: Party) {
         parties.remove(party)
     }
+
+    fun getParty(name: String) = parties.firstOrNull { it.id == name }
+
+    fun getParty(player: Player) = getParty(player.uniqueId)
 
     fun getParty(uniqueId: UUID): Party? = parties.firstOrNull { it.contains(uniqueId) }
 
