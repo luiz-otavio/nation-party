@@ -10,16 +10,47 @@ import com.nationcraft.party.util.EventBus;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.command.ICommand;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class LegacyHandler {
 
+    private final PartyRepository partyRepository = PartyRepository.INSTANCE;
     private final MinecraftServer minecraftServer = MinecraftServer.getServer();
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onLivingAttack(LivingAttackEvent event) {
+        Entity entity = event.entityLiving;
+
+        if (!(entity instanceof EntityPlayer)) return;
+
+        EntityPlayer player = (EntityPlayer) entity;
+
+        Party party = partyRepository.getParty(
+          player.getUniqueID()
+        );
+
+        if (party == null) return;
+
+        DamageSource source = event.source;
+
+        Entity attacker = source.getEntity();
+
+        if (!(attacker instanceof EntityPlayer)) return;
+
+        EntityPlayer attackerPlayer = (EntityPlayer) attacker;
+
+        if (party.contains(attackerPlayer.getUniqueID())) {
+            event.setCanceled(true);
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onCommand(CommandEvent event) {
@@ -51,7 +82,7 @@ public class LegacyHandler {
             return;
         }
 
-        Party party = PartyRepository.INSTANCE.getParty(player);
+        Party party = partyRepository.getParty(player);
 
         if (party == null) {
             return;
