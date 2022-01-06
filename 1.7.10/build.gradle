@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        mavenLocal()
         mavenCentral()
 
         maven {
@@ -29,8 +28,40 @@ minecraft {
     runDir = "run"
 }
 
+repositories() {
+    mavenLocal()
+
+    maven {
+        name = "elmakers-repo"
+        url = "https://maven.elmakers.com/repository/"
+    }
+}
+
+configurations {
+    provided
+
+    shade
+    compile.extendsFrom shade
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+}
+
 dependencies {
-    compile 'com.nationcraft.party:api:1.0-SNAPSHOT'
+    provided 'com.nationcraft.party:api:1.2-SNAPSHOT'
+
+    provided 'org.spigotmc:spigot:1.7.8-R0.1-SNAPSHOT'
+
+    provided fileTree(dir: 'libraries', include: ['*.jar'])
+}
+
+jar {
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
 }
 
 processResources {
