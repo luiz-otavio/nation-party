@@ -6,25 +6,26 @@ import com.nationcraft.party.repository.party.PartyRepository
 import me.saiintbrisson.bukkit.command.BukkitFrame
 import me.saiintbrisson.minecraft.ViewFrame
 import org.bukkit.Bukkit
-import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.java.JavaPlugin
 
-class PartyFrame(
-    plugin: Plugin
-) {
+class PartyPlugin : JavaPlugin() {
 
-    private val viewFrame: ViewFrame
-    private val bukkitFrame: BukkitFrame
+    companion object {
+        fun getInstance() = getPlugin(PartyPlugin::class.java)
+    }
 
-    init {
-        viewFrame = ViewFrame(plugin)
+    private lateinit var viewFrame: ViewFrame
+    private lateinit var bukkitFrame: BukkitFrame
 
-        bukkitFrame = BukkitFrame(plugin)
+    override fun onEnable() {
+        viewFrame = ViewFrame(this)
+        bukkitFrame = BukkitFrame(this)
 
         bukkitFrame.registerCommands(
             PartyCommand()
         )
 
-        Bukkit.getPluginManager().registerEvents(PartyHandler(), plugin)
+        Bukkit.getPluginManager().registerEvents(PartyHandler(), this)
     }
 
     fun getRepository() = PartyRepository

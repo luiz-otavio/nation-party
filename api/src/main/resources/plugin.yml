@@ -1,0 +1,6 @@
+name: PartyPlugin
+version: 1.0.0
+author: Wizard
+main: com.nationcraft.party.PartyPlugin
+depend:
+  - InventoryFramework
