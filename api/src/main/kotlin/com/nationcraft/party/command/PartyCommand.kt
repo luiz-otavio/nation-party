@@ -375,235 +375,235 @@ class PartyCommand {
                 translate("&eYou disbanded your party!")
             )
         }
+    }
 
 
-        @Command(
-            name = "party.list",
-            aliases = ["listar"],
-            description = "List all parties",
-            permission = "party.list",
-            target = CommandTarget.PLAYER
-        )
-        fun list(context: Context<Player>, @Optional(def = ["0"]) page: Int) {
-            val player = context.sender
+    @Command(
+        name = "party.list",
+        aliases = ["listar"],
+        description = "List all parties",
+        permission = "party.list",
+        target = CommandTarget.PLAYER
+    )
+    fun list(context: Context<Player>, @Optional(def = ["0"]) page: Int) {
+        val player = context.sender
 
-            if (page < 0) {
-                player.sendMessage(
-                    translate("&ePage number must be greater than 0!")
-                )
-
-                return
-            }
-
-            val parties = PartyRepository.getParties()
-
-            val maxPage = floor(parties.size / 10.0).toInt()
-
-            if (page > maxPage) {
-                player.sendMessage(
-                    translate("&ePage number must be less than $maxPage!")
-                )
-
-                return
-            }
-
-            val start = page * 10
-            val end = start + 10
-
-            val partiesToShow = parties.subList(start, end)
-
-            if (partiesToShow.isEmpty()) {
-                player.sendMessage(
-                    translate("&eThere are no parties to show!")
-                )
-
-                return
-            }
-
-            val transformer: (Party) -> CharSequence = { "&6${it.id} &e- &6${it.members.size}" }
-
+        if (page < 0) {
             player.sendMessage(
-                translate(
-                    " ",
-                    " &eParties:",
-                    " &e${partiesToShow.joinToString("\n ", transform = transformer)}",
-                    " ",
-                    "&eParties: &7(Page $page/$maxPage)"
-                )
+                translate("&ePage number must be greater than 0!")
             )
+
+            return
         }
 
-        @Command(
-            name = "party.info",
-            aliases = ["info"],
-            description = "Show party info",
-            permission = "party.info",
-            target = CommandTarget.PLAYER
-        )
-        fun info(context: Context<Player>, @Optional(def = ["0"]) page: Int) {
-            val player = context.sender
+        val parties = PartyRepository.getParties()
 
-            if (page < 0) {
-                player.sendMessage(
-                    translate("&ePage number must be greater than 0!")
-                )
+        val maxPage = floor(parties.size / 10.0).toInt()
 
-                return
-            }
-
-            val party = PartyRepository.getParty(player)
-
-            if (party == null) {
-                player.sendMessage(
-                    translate("&eYou are not in a party!")
-                )
-
-                return
-            }
-
-            val players = party.members
-
-            val maxPage = floor(players.size / 5.0).toInt()
-
-            if (page > maxPage) {
-                player.sendMessage(
-                    translate("&ePage number must be less than $maxPage!")
-                )
-
-                return
-            }
-
-            val start = page * 5
-            val end = start + 5
-
-            val playersToShow = players.subList(start, end)
-
-            val transformer: (PartyMember) -> CharSequence =
-                { if (it.isOnline()) "&a${it.getPlayer()?.name}" else "&cUnknown" }
-
+        if (page > maxPage) {
             player.sendMessage(
-                translate(
-                    " ",
-                    " &eParty: &6${party.id}",
-                    "  &eLeader: &6${party.getLeader()?.getPlayer()?.name}",
-                    " ",
-                    "&ePlayers: &7(Page: $page/$maxPage)",
-                    " &e${playersToShow.joinToString("\n &e- ", transform = transformer)}"
-                )
+                translate("&ePage number must be less than $maxPage!")
             )
+
+            return
         }
 
-        @Command(
-            name = "party.chat",
-            aliases = ["chat"],
-            description = "Enable party chat",
-            permission = "party.chat",
-            target = CommandTarget.PLAYER
+        val start = page * 10
+        val end = start + 10
+
+        val partiesToShow = parties.subList(start, end)
+
+        if (partiesToShow.isEmpty()) {
+            player.sendMessage(
+                translate("&eThere are no parties to show!")
+            )
+
+            return
+        }
+
+        val transformer: (Party) -> CharSequence = { "&6${it.id} &e- &6${it.members.size}" }
+
+        player.sendMessage(
+            translate(
+                " ",
+                " &eParties:",
+                " &e${partiesToShow.joinToString("\n ", transform = transformer)}",
+                " ",
+                "&eParties: &7(Page $page/$maxPage)"
+            )
         )
-        fun chat(context: Context<Player>) {
-            val player = context.sender
+    }
 
-            val party = PartyRepository.getParty(player)
+    @Command(
+        name = "party.info",
+        aliases = ["info"],
+        description = "Show party info",
+        permission = "party.info",
+        target = CommandTarget.PLAYER
+    )
+    fun info(context: Context<Player>, @Optional(def = ["0"]) page: Int) {
+        val player = context.sender
 
-            if (party == null) {
+        if (page < 0) {
+            player.sendMessage(
+                translate("&ePage number must be greater than 0!")
+            )
+
+            return
+        }
+
+        val party = PartyRepository.getParty(player)
+
+        if (party == null) {
+            player.sendMessage(
+                translate("&eYou are not in a party!")
+            )
+
+            return
+        }
+
+        val players = party.members
+
+        val maxPage = floor(players.size / 5.0).toInt()
+
+        if (page > maxPage) {
+            player.sendMessage(
+                translate("&ePage number must be less than $maxPage!")
+            )
+
+            return
+        }
+
+        val start = page * 5
+        val end = start + 5
+
+        val playersToShow = players.subList(start, end)
+
+        val transformer: (PartyMember) -> CharSequence =
+            { if (it.isOnline()) "&a${it.getPlayer()?.name}" else "&cUnknown" }
+
+        player.sendMessage(
+            translate(
+                " ",
+                " &eParty: &6${party.id}",
+                "  &eLeader: &6${party.getLeader()?.getPlayer()?.name}",
+                " ",
+                "&ePlayers: &7(Page: $page/$maxPage)",
+                " &e${playersToShow.joinToString("\n &e- ", transform = transformer)}"
+            )
+        )
+    }
+
+    @Command(
+        name = "party.chat",
+        aliases = ["chat"],
+        description = "Enable party chat",
+        permission = "party.chat",
+        target = CommandTarget.PLAYER
+    )
+    fun chat(context: Context<Player>) {
+        val player = context.sender
+
+        val party = PartyRepository.getParty(player)
+
+        if (party == null) {
+            player.sendMessage(
+                translate("&eYou can't enable party chat if you aren't in a party!")
+            )
+        } else {
+            val member = party.getMember(player)
+
+            if (member == null) {
                 player.sendMessage(
                     translate("&eYou can't enable party chat if you aren't in a party!")
                 )
             } else {
-                val member = party.getMember(player)
-
-                if (member == null) {
-                    player.sendMessage(
-                        translate("&eYou can't enable party chat if you aren't in a party!")
-                    )
-                } else {
-                    val event = callTo(
-                        PartyUpdateChattingEvent(party, player, !member.isChatting)
-                    )
-
-                    if (event.isCancelled) {
-                        return
-                    }
-
-                    member.isChatting = event.isChatting
-
-                    player.sendMessage(
-                        translate("&eYou ${if (event.isChatting) "enabled" else "disabled"} party chat!")
-                    )
-                }
-            }
-        }
-
-        @Command(
-            name = "party.promote",
-            aliases = ["promover"],
-            description = "Promote a party member",
-            permission = "party.promote",
-            target = CommandTarget.PLAYER
-        )
-        fun promote(context: Context<Player>, target: Player?) {
-            val player = context.sender
-
-            if (target == null) {
-                player.sendMessage(
-                    translate("&eYou must specify a player!")
+                val event = callTo(
+                    PartyUpdateChattingEvent(party, player, !member.isChatting)
                 )
 
-                return
+                if (event.isCancelled) {
+                    return
+                }
+
+                member.isChatting = event.isChatting
+
+                player.sendMessage(
+                    translate("&eYou ${if (event.isChatting) "enabled" else "disabled"} party chat!")
+                )
             }
+        }
+    }
 
-            val party = PartyRepository.getParty(player)
+    @Command(
+        name = "party.promote",
+        aliases = ["promover"],
+        description = "Promote a party member",
+        permission = "party.promote",
+        target = CommandTarget.PLAYER
+    )
+    fun promote(context: Context<Player>, target: Player?) {
+        val player = context.sender
 
-            if (party == null) {
+        if (target == null) {
+            player.sendMessage(
+                translate("&eYou must specify a player!")
+            )
+
+            return
+        }
+
+        val party = PartyRepository.getParty(player)
+
+        if (party == null) {
+            player.sendMessage(
+                translate("&eYou can't promote a player if you aren't in a party!")
+            )
+        } else {
+            val member = party.getMember(player)
+
+            if (member == null) {
                 player.sendMessage(
                     translate("&eYou can't promote a player if you aren't in a party!")
                 )
             } else {
-                val member = party.getMember(player)
-
-                if (member == null) {
+                if (!member.isLeader) {
                     player.sendMessage(
-                        translate("&eYou can't promote a player if you aren't in a party!")
+                        translate("&eYou can't promote a player if you aren't the party leader!")
                     )
                 } else {
-                    if (!member.isLeader) {
+                    val targetMember = party.getMember(target)
+
+                    if (targetMember == null) {
                         player.sendMessage(
-                            translate("&eYou can't promote a player if you aren't the party leader!")
+                            translate("&e${target.name} is not in your party!")
                         )
                     } else {
-                        val targetMember = party.getMember(target)
+                        val event = callTo(
+                            PartyPromoteEvent(target, player, party)
+                        )
 
-                        if (targetMember == null) {
-                            player.sendMessage(
-                                translate("&e${target.name} is not in your party!")
+                        if (event.isCancelled) {
+                            return
+                        }
+
+                        targetMember.isLeader = true
+                        member.isLeader = false
+
+                        player.sendMessage(
+                            translate("&eYou promoted ${target.name} to party leader!")
+                        )
+
+                        target.sendMessage(
+                            translate("&eYou were promoted to party leader by ${player.name}!")
+                        )
+
+                        for (each in party.members) {
+                            val user = each.getPlayer() ?: continue
+
+                            user.sendMessage(
+                                translate("&e${target.name} was promoted to party leader!")
                             )
-                        } else {
-                            val event = callTo(
-                                PartyPromoteEvent(target, player, party)
-                            )
-
-                            if (event.isCancelled) {
-                                return
-                            }
-
-                            targetMember.isLeader = true
-                            member.isLeader = false
-
-                            player.sendMessage(
-                                translate("&eYou promoted ${target.name} to party leader!")
-                            )
-
-                            target.sendMessage(
-                                translate("&eYou were promoted to party leader by ${player.name}!")
-                            )
-
-                            for (each in party.members) {
-                                val user = each.getPlayer() ?: continue
-
-                                user.sendMessage(
-                                    translate("&e${target.name} was promoted to party leader!")
-                                )
-                            }
                         }
                     }
                 }
