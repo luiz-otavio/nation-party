@@ -3,6 +3,7 @@ package com.nationcraft.party.listener
 import com.nationcraft.party.event.PartyChatEvent
 import com.nationcraft.party.repository.party.PartyRepository
 import com.nationcraft.party.util.callTo
+import com.nationcraft.party.util.translate
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -32,7 +33,9 @@ class PartyHandler : Listener {
             for (each in party.members) {
                 val user = each.getPlayer() ?: continue
 
-                user.sendMessage(call.message)
+                user.sendMessage(
+                    translate("&e&l[P] &e${player.name}&7: &7${event.message}")
+                )
             }
         }
     }
