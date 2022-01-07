@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'com.nationcraft.party'
-version '1.2-SNAPSHOT'
+version '1.4-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -16,13 +16,6 @@ repositories {
         name = "elmakers"
         url = "https://maven.elmakers.com/repository/"
     }
-
-    maven {
-        name = "jitpack"
-        url = 'https://jitpack.io'
-    }
-
-    mavenLocal()
 }
 
 jar.enabled = false
