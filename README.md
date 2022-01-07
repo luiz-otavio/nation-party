@@ -6,7 +6,7 @@ Make your adventure as shared with your friends and family in Nation Party.
     * Invite how many friends you want to join your party;
     * Share messages with your friends;
     * Share quests rewards with your friends;
-    * Disable the PvP with your friends in the party;
+    * Disable the PvP with your friends in the party.
 
 ## Compatibility
 We built it with in mind to be compatible with the most popular versions in Forge.
