@@ -139,6 +139,80 @@ class PartyCommand : Command(
                 }
             }
 
+            if (args[0] == "listar" || args[0] == "list") {
+                val parties = PartyRepository.getParties()
+
+                val maxPage = floor(parties.size / 10.0).toInt()
+
+                val start = 0 * 10
+                val end = start + 10
+
+                val partiesToShow = parties.subList(
+                    start,
+                    if (end > parties.size) parties.size else end
+                )
+
+                if (partiesToShow.isEmpty()) {
+                    sender.sendMessage(
+                        translate("&eThere are no parties to show!")
+                    )
+
+                    return false
+                }
+
+                val transformer: (Party) -> CharSequence = { "&6${it.id} &e- &6${it.members.size}" }
+
+                sender.sendMessage(
+                    translate(
+                        " ",
+                        " &eParties:",
+                        " &e${partiesToShow.joinToString("\n ", transform = transformer)}",
+                        " ",
+                        "&eParties: &7(Page 1/$maxPage)"
+                    )
+                )
+
+                return true
+            }
+
+            if (args[0] == "info") {
+                val party = PartyRepository.getParty(sender)
+
+                if (party == null) {
+                    sender.sendMessage(
+                        translate("&eYou are not in a party!")
+                    )
+
+                    return false
+                }
+
+                val players = party.members
+
+                val maxPage = floor(players.size / 5.0).toInt()
+
+                val start = 0 * 5
+                val end = start + 5
+
+                val playersToShow = players.subList(
+                    start,
+                    if (end > players.size) players.size else end
+                )
+
+                val transformer: (PartyMember) -> CharSequence =
+                    { if (it.isOnline()) "&a${it.getPlayer()?.name}" else "&cUnknown" }
+
+                sender.sendMessage(
+                    translate(
+                        " ",
+                        " &eParty: &6${party.id}",
+                        "  &eLeader: &6${party.getLeader()?.getPlayer()?.name}",
+                        " ",
+                        "&ePlayers: &7(Page: 1/$maxPage)",
+                        " &e${playersToShow.joinToString("\n &e- ", transform = transformer)}"
+                    )
+                )
+            }
+
             if (args[0] == "chat") {
                 val party = PartyRepository.getParty(sender)
 
@@ -182,7 +256,7 @@ class PartyCommand : Command(
                     return false
                 }
 
-                if (PartyRepository.getParty(name) != null) {
+                if (PartyRepository.getParty(args[1]) != null) {
                     sender.sendMessage(
                         translate("&cThis party already exists!")
                     )
@@ -190,7 +264,7 @@ class PartyCommand : Command(
                     return false
                 }
 
-                val party = Party(name)
+                val party = Party(args[1])
 
                 val member = PartyMember(
                     sender.uniqueId,
@@ -478,10 +552,13 @@ class PartyCommand : Command(
                     return false
                 }
 
-                val start = page * 10
+                val start = (page - 1) * 10
                 val end = start + 10
 
-                val partiesToShow = parties.subList(start, end)
+                val partiesToShow = parties.subList(
+                    start,
+                    if (end > parties.size) parties.size else end
+                )
 
                 if (partiesToShow.isEmpty()) {
                     sender.sendMessage(
@@ -539,10 +616,13 @@ class PartyCommand : Command(
                     return false
                 }
 
-                val start = page * 5
+                val start = (page - 1) * 5
                 val end = start + 5
 
-                val playersToShow = players.subList(start, end)
+                val playersToShow = players.subList(
+                    start,
+                    if (end > players.size) players.size else end
+                )
 
                 val transformer: (PartyMember) -> CharSequence =
                     { if (it.isOnline()) "&a${it.getPlayer()?.name}" else "&cUnknown" }
@@ -558,8 +638,6 @@ class PartyCommand : Command(
                     )
                 )
             }
-
-            return true
         }
 
         return false
