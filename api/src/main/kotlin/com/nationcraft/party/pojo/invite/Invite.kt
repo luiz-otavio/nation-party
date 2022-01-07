@@ -39,6 +39,8 @@ data class Invite(
 
             player.sendMessage(message)
         }
+
+        InviteRepository.removeInvite(this)
     }
 
     fun decline() {
