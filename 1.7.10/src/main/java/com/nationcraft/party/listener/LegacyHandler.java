@@ -48,6 +48,8 @@ public class LegacyHandler {
         EntityPlayer attackerPlayer = (EntityPlayer) attacker;
 
         if (party.contains(attackerPlayer.getUniqueID())) {
+            player.playSound("block.note.hat", 1F, 1F);
+
             event.setCanceled(true);
         }
     }
