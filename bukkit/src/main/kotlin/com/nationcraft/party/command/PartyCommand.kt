@@ -9,6 +9,7 @@ import com.nationcraft.party.repository.party.PartyRepository
 import com.nationcraft.party.util.callTo
 import com.nationcraft.party.util.translate
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -30,16 +31,16 @@ class PartyCommand : Command(
                     " &eMade by Wizard & Castruu - Available for 1.12.2 & 1.7.10",
                     " &eFor any issues, make your comment in &fhttps://github.com/luiz-otavio/nation-party",
                     " ",
-                    " &e/party create <name> - Create a party",
-                    " &e/party invite <player> - Invite a player to your party",
-                    " &e/party accept <name> - Accept a party invitation",
-                    " &e/party promote <player> - Promote a player to party leader",
-                    " &e/party leave - Leave your party",
-                    " &e/party kick <player> - Kick a player from your party",
-                    " &e/party disband - Disband your party",
-                    " &e/party list - List all parties",
-                    " &e/party info - Show party info",
-                    " &e/party chat - Enable party chat",
+                    " &e/party create <name> &6- &eCrie uma party.",
+                    " &e/party invite <player> &6- &eConvide seu amigo para seu grupo.",
+                    " &e/party accept <name> &6- &eAceita o convite de seu amigo.",
+                    " &e/party promote <player> &6- &ePromova um membro para lider.",
+                    " &e/party leave &6- &eSaia do seu grupo.",
+                    " &e/party kick <player> &6- &eExpulsa um membro do seu grupo.",
+                    " &e/party disband &6- &eDesfaz seu grupo.",
+                    " &e/party list &6- &eListe todas as parties do servidor.",
+                    " &e/party info &6- &eListe informações sobre seu grupo.",
+                    " &e/party chat &6- &eHabilite ou desabilite o chat do seu grupo.",
                     " "
                 )
             )
@@ -56,9 +57,7 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&cYou are not in a party!")
-                    )
+                    sender.error("Você não está em nenhum grupo para realizar essa operação.")
 
                     return false
                 }
@@ -66,9 +65,7 @@ class PartyCommand : Command(
                 val member = party.getMember(sender) ?: return false
 
                 if (member.isLeader) {
-                    sender.sendMessage(
-                        translate("&cYou are the leader of your party! You must disband the party before leaving it!")
-                    )
+                    sender.error("Você é o lider do grupo! Para sair, promova alguém ou use /party disband.")
 
                     return false
                 }
@@ -83,15 +80,24 @@ class PartyCommand : Command(
 
                 party.removePlayer(member)
 
-                sender.sendMessage(
-                    translate("&aYou left the party!")
+                sender.success(
+                    "Você saiu do grupo ${party.id}."
+                )
+
+                val message = translate(
+                    "&e[Party] &6${sender.name} &e saiu do grupo &6${party.id}&e."
                 )
 
                 for (target in party.members) {
                     val user = target.getPlayer() ?: continue
 
-                    user.sendMessage(
-                        translate("&e${sender.name} &ahas left the party!")
+                    user.sendMessage(message)
+
+                    user.playSound(
+                        user.location,
+                        Sound.ORB_PICKUP,
+                        1f,
+                        1f
                     )
                 }
             }
@@ -100,15 +106,15 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&eYou can't disband a party that doesn't exist!")
+                    sender.error(
+                        "Você não está em nenhum grupo para realizar essa operação."
                     )
                 } else {
                     val member = party.getMember(sender) ?: return false
 
                     if (!member.isLeader) {
-                        sender.sendMessage(
-                            translate("&eYou can't disband a party that you aren't the leader!")
+                        sender.error(
+                            "Você não é o lider do grupo! Para deletar, seja promovido ou use /party leave."
                         )
                     } else {
                         val event = callTo(
@@ -122,18 +128,27 @@ class PartyCommand : Command(
                         }
                     }
 
+                    val message = translate(
+                        "&e[Party] &6${sender.name} &e deletou o grupo &6${party.id}&e."
+                    )
+
                     for (target in party.members) {
                         val user = target.getPlayer() ?: continue
 
-                        user.sendMessage(
-                            translate("&eYour party has been disbanded!")
+                        user.sendMessage(message)
+
+                        user.playSound(
+                            user.location,
+                            Sound.ENDERDRAGON_GROWL,
+                            1f,
+                            1f
                         )
                     }
 
                     PartyRepository.removeParty(party)
 
-                    sender.sendMessage(
-                        translate("&eYou disbanded your party!")
+                    sender.success(
+                        "Você deletou o grupo ${party.id}."
                     )
 
                     return true
@@ -155,8 +170,8 @@ class PartyCommand : Command(
                 )
 
                 if (partiesToShow.isEmpty()) {
-                    sender.sendMessage(
-                        translate("&eThere are no parties to show!")
+                    sender.error(
+                        "Não há nenhum grupo para mostrar."
                     )
 
                     return false
@@ -181,8 +196,8 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&eYou are not in a party!")
+                    sender.error(
+                        "Você não está em nenhum grupo para realizar essa operação."
                     )
 
                     return false
@@ -220,31 +235,25 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&eYou can't enable party chat if you aren't in a party!")
+                    sender.error(
+                        "Você não está em nenhum grupo para realizar essa operação."
                     )
                 } else {
-                    val member = party.getMember(sender)
+                    val member = party.getMember(sender) ?: return false
 
-                    if (member == null) {
-                        sender.sendMessage(
-                            translate("&eYou can't enable party chat if you aren't in a party!")
-                        )
-                    } else {
-                        val event = callTo(
-                            PartyUpdateChattingEvent(party, sender, !member.isChatting)
-                        )
+                    val event = callTo(
+                        PartyUpdateChattingEvent(party, sender, !member.isChatting)
+                    )
 
-                        if (event.isCancelled) {
-                            return false
-                        }
-
-                        member.isChatting = event.isChatting
-
-                        sender.sendMessage(
-                            translate("&eYou ${if (event.isChatting) "enabled" else "disabled"} party chat!")
-                        )
+                    if (event.isCancelled) {
+                        return false
                     }
+
+                    member.isChatting = event.isChatting
+
+                    sender.success(
+                        "Você &6${if (event.isChatting) "ativou" else "desativou"} &eo chat do grupo."
+                    )
                 }
             }
         }
@@ -252,16 +261,16 @@ class PartyCommand : Command(
         if (args.size == 2) {
             if (args[0] == "create" || args[0] == "criar") {
                 if (PartyRepository.getParty(sender) != null) {
-                    sender.sendMessage(
-                        translate("&cThis party already exists!")
+                    sender.error(
+                        "Você já está em um grupo."
                     )
 
                     return false
                 }
 
                 if (PartyRepository.getParty(args[1]) != null) {
-                    sender.sendMessage(
-                        translate("&cThis party already exists!")
+                    sender.error(
+                        "Esse grupo de jogadores já existe."
                     )
 
                     return false
@@ -286,10 +295,8 @@ class PartyCommand : Command(
 
                 PartyRepository.addParty(party)
 
-                sender.sendMessage(
-                    translate(
-                        "&aParty created!"
-                    )
+                sender.success(
+                    "Você criou um grupo de jogadores com o nome de &6${party.id}&e."
                 )
 
                 return true
@@ -301,8 +308,8 @@ class PartyCommand : Command(
                 )
 
                 if (target == null) {
-                    sender.sendMessage(
-                        translate("&cThis player aren't online right now.")
+                    sender.error(
+                        "O jogador &6${args[1]} &enão está online."
                     )
 
                     return false
@@ -311,8 +318,8 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&cYou are not in a party!")
+                    sender.error(
+                        "Você não está em nenhum grupo para realizar essa operação."
                     )
 
                     return false
@@ -321,24 +328,24 @@ class PartyCommand : Command(
                 val leader = party.getMember(sender) ?: return false
 
                 if (!leader.isLeader) {
-                    sender.sendMessage(
-                        translate("&cYou are not the leader of your party!")
+                    sender.error(
+                        "Você não é o líder do grupo para realizar essa operação."
                     )
 
                     return false
                 }
 
                 if (PartyRepository.getParty(target) != null) {
-                    sender.sendMessage(
-                        translate("&cThis player is already in a party!")
+                    sender.error(
+                        "O jogador &6${target.name} &ejá está em um grupo."
                     )
 
                     return false
                 }
 
                 if (InviteRepository.hasInvite(party, target.uniqueId)) {
-                    sender.sendMessage(
-                        translate("&cThis player already has an invite!")
+                    sender.error(
+                        "O jogador &6${target.name} &ejá recebeu um convite para o grupo."
                     )
 
                     return false
@@ -356,16 +363,12 @@ class PartyCommand : Command(
                     Invite(target.uniqueId, sender.uniqueId, party)
                 )
 
-                target.sendMessage(
-                    translate(
-                        "&eYou have been invited to your party by &f${sender.name}&e!"
-                    )
+                target.success(
+                    "&6${sender.name} &einvitou você para o grupo &6${party.id}&e."
                 )
 
-                sender.sendMessage(
-                    translate(
-                        "&aInvite sent!"
-                    )
+                sender.success(
+                    "Você convidou &6${target.name} &epara o grupo &6${party.id}&e."
                 )
 
                 return true
@@ -373,15 +376,15 @@ class PartyCommand : Command(
 
             if (args[0] == "aceitar" || args[0] == "accept") {
                 if (PartyRepository.getParty(sender) != null) {
-                    sender.sendMessage(
-                        translate("&eYou are already in a party!")
+                    sender.error(
+                        "Você já está em um grupo."
                     )
                 } else {
                     val invite = InviteRepository.getInvite(sender.uniqueId, args[1])
 
                     if (invite == null) {
-                        sender.sendMessage(
-                            translate("&eThere is no invite from this party name!")
+                        sender.error(
+                            "Você não recebeu nenhum convite para o grupo &6${args[1]}&e."
                         )
 
                         return false
@@ -399,8 +402,8 @@ class PartyCommand : Command(
                 )
 
                 if (player == null) {
-                    sender.sendMessage(
-                        translate("&cYou must specify a player to kick!")
+                    sender.error(
+                        "O jogador &6${args[1]} &enão está online."
                     )
 
                     return false
@@ -409,16 +412,16 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(player)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&You aren't in a party!")
+                    sender.error(
+                        "O jogador &6${player.name} &enão está em nenhum grupo."
                     )
 
                     return false
                 }
 
                 if (player == sender) {
-                    sender.sendMessage(
-                        translate("&cYou can't kick yourself!")
+                    sender.error(
+                        "Você não pode expulsar você mesmo."
                     )
 
                     return false
@@ -427,8 +430,8 @@ class PartyCommand : Command(
                 val member = party.getMember(sender) ?: return false
 
                 if (!member.isLeader) {
-                    sender.sendMessage(
-                        translate("&cYou can't kick a player from your party!")
+                    sender.error(
+                        "Você não é o líder do grupo para realizar essa operação."
                     )
 
                     return false
@@ -437,8 +440,8 @@ class PartyCommand : Command(
                 val user = party.getMember(player)
 
                 if (user == null) {
-                    sender.sendMessage(
-                        translate("&cThis player isn't in your party!")
+                    sender.error(
+                        "O jogador &6${player.name} &enão está no grupo."
                     )
 
                     return false
@@ -454,8 +457,8 @@ class PartyCommand : Command(
 
                 party.removePlayer(user)
 
-                sender.sendMessage(
-                    translate("&eYou kicked a player from your party!")
+                player.success(
+                    "&6${sender.name} &eexpulsou você do grupo &6${party.id}&e."
                 )
 
                 return true
@@ -467,8 +470,8 @@ class PartyCommand : Command(
                 )
 
                 if (target == null) {
-                    sender.sendMessage(
-                        translate("&eYou must specify a player!")
+                    sender.error(
+                        "O jogador &6${args[1]} &enão está online."
                     )
 
                     return false
@@ -477,55 +480,58 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&eYou can't promote a player if you aren't in a party!")
+                    sender.error(
+                        "Você não está em nenhum grupo."
                     )
                 } else {
-                    val member = party.getMember(sender)
+                    val member = party.getMember(sender) ?: return false
 
-                    if (member == null) {
-                        sender.sendMessage(
-                            translate("&eYou can't promote a player if you aren't in a party!")
+                    if (!member.isLeader) {
+                        sender.error(
+                            "Você não é o líder do grupo para realizar essa operação."
                         )
                     } else {
-                        if (!member.isLeader) {
-                            sender.sendMessage(
-                                translate("&eYou can't promote a player if you aren't the party leader!")
+                        val targetMember = party.getMember(target)
+
+                        if (targetMember == null) {
+                            sender.error(
+                                "O jogador &6${target.name} &enão está no grupo."
                             )
                         } else {
-                            val targetMember = party.getMember(target)
+                            val event = callTo(
+                                PartyPromoteEvent(target, sender, party)
+                            )
 
-                            if (targetMember == null) {
-                                sender.sendMessage(
-                                    translate("&e${target.name} is not in your party!")
+                            if (event.isCancelled) {
+                                return false
+                            }
+
+                            targetMember.isLeader = true
+                            member.isLeader = false
+
+                            sender.success(
+                                "&6${target.name} &efoi promovido a líder do grupo &6${party.id}&e."
+                            )
+
+                            target.success(
+                                "&6${sender.name} &epromoveu você a líder do grupo &6${party.id}&e."
+                            )
+
+                            val message = translate(
+                                "&e[Party] &6${sender.name} &efoi promovido à lider do grupo."
+                            )
+
+                            for (each in party.members) {
+                                val user = each.getPlayer() ?: continue
+
+                                user.sendMessage(message)
+
+                                user.playSound(
+                                    user.location,
+                                    Sound.LEVEL_UP,
+                                    1F,
+                                    1F
                                 )
-                            } else {
-                                val event = callTo(
-                                    PartyPromoteEvent(target, sender, party)
-                                )
-
-                                if (event.isCancelled) {
-                                    return false
-                                }
-
-                                targetMember.isLeader = true
-                                member.isLeader = false
-
-                                sender.sendMessage(
-                                    translate("&eYou promoted ${target.name} to party leader!")
-                                )
-
-                                target.sendMessage(
-                                    translate("&eYou were promoted to party leader by ${sender.name}!")
-                                )
-
-                                for (each in party.members) {
-                                    val user = each.getPlayer() ?: continue
-
-                                    user.sendMessage(
-                                        translate("&e${target.name} was promoted to party leader!")
-                                    )
-                                }
                             }
                         }
                     }
@@ -536,8 +542,8 @@ class PartyCommand : Command(
                 val page = args[1].toIntOrNull() ?: -1
 
                 if (page < 0) {
-                    sender.sendMessage(
-                        translate("&ePage number must be greater than 0!")
+                    sender.error(
+                        "A página deve ser um número inteiro positivo."
                     )
 
                     return false
@@ -549,8 +555,8 @@ class PartyCommand : Command(
                     .toInt()
 
                 if (page > maxPage) {
-                    sender.sendMessage(
-                        translate("&ePage number must be less than $maxPage!")
+                    sender.error(
+                        "A página não existe."
                     )
 
                     return false
@@ -565,8 +571,8 @@ class PartyCommand : Command(
                 )
 
                 if (partiesToShow.isEmpty()) {
-                    sender.sendMessage(
-                        translate("&eThere are no parties to show!")
+                    sender.error(
+                        "Não há nenhum grupo para mostrar."
                     )
 
                     return false
@@ -591,8 +597,8 @@ class PartyCommand : Command(
                 val page = args[1].toIntOrNull() ?: -1
 
                 if (page < 0) {
-                    sender.sendMessage(
-                        translate("&ePage number must be greater than 0!")
+                    sender.error(
+                        "A página deve ser um número inteiro positivo."
                     )
 
                     return false
@@ -601,8 +607,8 @@ class PartyCommand : Command(
                 val party = PartyRepository.getParty(sender)
 
                 if (party == null) {
-                    sender.sendMessage(
-                        translate("&eYou are not in a party!")
+                    sender.error(
+                        "Você não está em um grupo."
                     )
 
                     return false
@@ -614,8 +620,8 @@ class PartyCommand : Command(
                     .toInt()
 
                 if (page > maxPage) {
-                    sender.sendMessage(
-                        translate("&ePage number must be less than $maxPage!")
+                    sender.error(
+                        "A página não existe."
                     )
 
                     return false
@@ -646,5 +652,29 @@ class PartyCommand : Command(
         }
 
         return false
+    }
+
+    private fun CommandSender.success(message: String) {
+        sendMessage(
+            translate(
+                "&a[Party] &e$message"
+            )
+        )
+
+        if (this is Player) {
+            playSound(location, Sound.ORB_PICKUP, 1f, 1f)
+        }
+    }
+
+    private fun CommandSender.error(message: String) {
+        sendMessage(
+            translate(
+                "&c$message"
+            )
+        )
+
+        if (this is Player) {
+            playSound(location, Sound.VILLAGER_NO, 1f, 1f)
+        }
     }
 }

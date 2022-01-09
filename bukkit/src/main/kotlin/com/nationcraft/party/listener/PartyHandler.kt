@@ -4,6 +4,7 @@ import com.nationcraft.party.event.PartyChatEvent
 import com.nationcraft.party.repository.party.PartyRepository
 import com.nationcraft.party.util.callTo
 import com.nationcraft.party.util.translate
+import org.bukkit.Sound
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -38,6 +39,13 @@ class PartyHandler : Listener {
                 user.sendMessage(
                     translate("&e&l[P] &e${player.name}&7: &7${event.message}")
                 )
+
+                user.playSound(
+                    user.location,
+                    Sound.CHICKEN_EGG_POP,
+                    1F,
+                    1F
+                )
             }
         }
     }
@@ -56,7 +64,7 @@ class PartyHandler : Listener {
             }
 
             target.sendMessage(
-                translate("&e&l[P] &e${player.name}&7 exited the server.")
+                translate("&e&l[NP] &e${player.name}&7 saiu do servidor.")
             )
         }
 
@@ -78,15 +86,15 @@ class PartyHandler : Listener {
             user.isLeader = false
             anyone.isLeader = true
 
+            val messages = arrayOf(
+                translate("&e&l[NP] &e${player.name}&7 não é mais o lider do grupo."),
+                translate("&e&l[NP] &e${targetPlayer.name}&7 agora é o líder do grupo.")
+            )
+
             for (member in party.members) {
                 val target = member.getPlayer() ?: continue
 
-                target.sendMessage(
-                    translate(
-                        "&e&l[P] &e${player.name}&7 is no longer the leader.",
-                        "&e&l[P] &e${targetPlayer.name}&7 is now the leader."
-                    )
-                )
+                target.sendMessage(messages)
             }
         }
     }
@@ -105,7 +113,7 @@ class PartyHandler : Listener {
             }
 
             target.sendMessage(
-                translate("&e&l[P] &e${player.name}&7 entered the server.")
+                translate("&e&l[NP] &e${player.name}&7 entrou no servidor.")
             )
         }
     }
