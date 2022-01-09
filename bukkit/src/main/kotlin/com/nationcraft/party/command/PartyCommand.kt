@@ -12,6 +12,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import kotlin.math.ceil
 import kotlin.math.floor
 
 class PartyCommand : Command(
@@ -142,7 +143,8 @@ class PartyCommand : Command(
             if (args[0] == "listar" || args[0] == "list") {
                 val parties = PartyRepository.getParties()
 
-                val maxPage = floor(parties.size / 10.0).toInt()
+                val maxPage = ceil(parties.size / 10.0)
+                    .toInt()
 
                 val start = 0 * 10
                 val end = start + 10
@@ -188,7 +190,8 @@ class PartyCommand : Command(
 
                 val players = party.members
 
-                val maxPage = floor(players.size / 5.0).toInt()
+                val maxPage = ceil(players.size / 5.0)
+                    .toInt()
 
                 val start = 0 * 5
                 val end = start + 5
@@ -542,7 +545,8 @@ class PartyCommand : Command(
 
                 val parties = PartyRepository.getParties()
 
-                val maxPage = floor(parties.size / 10.0).toInt()
+                val maxPage = ceil(parties.size / 10.0)
+                    .toInt()
 
                 if (page > maxPage) {
                     sender.sendMessage(
@@ -606,7 +610,8 @@ class PartyCommand : Command(
 
                 val players = party.members
 
-                val maxPage = floor(players.size / 5.0).toInt()
+                val maxPage = ceil(players.size / 5.0)
+                    .toInt()
 
                 if (page > maxPage) {
                     sender.sendMessage(
